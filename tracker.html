@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kabir Empire - Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#ffffff">
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f2f2f7;
+    }
+    .container {
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+    .date-time {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #666;
+    }
+    .task {
+      background: #fff;
+      padding: 15px;
+      border-radius: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .task span {
+      font-size: 16px;
+    }
+    .task button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      background: #007aff;
+      color: white;
+      font-size: 14px;
+    }
+    .submit-btn {
+      margin-top: 30px;
+      width: 100%;
+      padding: 15px;
+      font-size: 18px;
+      background: #34c759;
+      color: white;
+      border: none;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📅 Kabir Tracker</h1>
+    <div class="date-time" id="datetime"></div>
+
+    <div id="taskList"></div>
+
+    <button class="submit-btn" onclick="submitTasks()">✅ Submit Day</button>
+  </div>
+
+  <script>
+    const activities = [
+      "1 hr Harmonium 🎹",
+      "3 hr Research 📖",
+      "30 min Humming 🎶",
+      "1 hr Book Reading 📚",
+      "Eat Healthy (2x) 🥗",
+      "3 Litres Water 💧",
+      "Face Grooming 🪒",
+      "15 min Exercise 🏋️‍♂️",
+      "1 Informative Video 🎥"
+    ];
+
+    const taskList = document.getElementById("taskList");
+    const statusMap = {};
+
+    activities.forEach((task, index) => {
+      const taskBox = document.createElement("div");
+      taskBox.className = "task";
+      taskBox.innerHTML = `
+        <span>${task}</span>
+        <button onclick="toggleStatus(${index}, this)">Not Done</button>
+      `;
+      taskList.appendChild(taskBox);
+      statusMap[index] = false;
+    });
+
+    function toggleStatus(index, btn) {
+      statusMap[index] = !statusMap[index];
+      btn.innerText = statusMap[index] ? "Done ✅" : "Not Done";
+      btn.style.backgroundColor = statusMap[index] ? "#34c759" : "#007aff";
+    }
+
+    function submitTasks() {
+      const results = activities.map((task, i) => ({
+        task,
+        done: statusMap[i]
+      }));
+      localStorage.setItem("kabirDay", JSON.stringify({
+        date: new Date().toLocaleDateString(),
+        time: new Date().toLocaleTimeString(),
+        results
+      }));
+      window.location.href = "report.html";
+    }
+
+    document.getElementById("datetime").innerText =
+      new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString();
+  </script>
+</body>
+</html>
