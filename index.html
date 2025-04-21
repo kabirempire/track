@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <title>Kabir Empire - Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#ffffff">
-  <title>Kabir Empire - Login</title>
   <style>
     body {
       margin: 0;
@@ -18,44 +19,99 @@
     .login-box {
       width: 90%;
       max-width: 400px;
-      background: #fff;
-      border-radius: 20px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      background: white;
       padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
     }
-    input, button {
+    .login-box h2 {
+      text-align: center;
+      font-weight: 600;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .login-box input {
       width: 100%;
-      padding: 15px;
+      padding: 14px;
       margin-top: 15px;
-      border: 1px solid #ccc;
       border-radius: 12px;
+      border: 1px solid #ccc;
       font-size: 16px;
-      outline: none;
     }
-    button {
+    .login-box button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
       background-color: #007aff;
       color: white;
-      border: none;
+      font-size: 17px;
+      font-weight: 500;
+      transition: background 0.3s;
+    }
+    .login-box button:hover {
+      background-color: #005fcc;
+    }
+    .login-box .error {
+      color: red;
+      margin-top: 10px;
+      text-align: center;
+    }
+    .remember {
+      margin-top: 10px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+    }
+    .remember input {
+      width: auto;
+      margin-right: 8px;
     }
   </style>
 </head>
 <body>
   <div class="login-box">
-    <h2 style="text-align:center;">👑 Kabir Empire</h2>
-    <input type="text" id="username" placeholder="Username (kabir)">
-    <input type="password" id="password" placeholder="Password (empire123)">
-    <button onclick="login()">Login</button>
-    <p id="error" style="color:red; text-align:center;"></p>
+    <h2>👑 Kabir Empire</h2>
+    <form onsubmit="return login(event)">
+      <input type="text" id="username" placeholder="Username" autocomplete="username" required>
+      <input type="password" id="password" placeholder="Password" autocomplete="current-password" required>
+      <div class="remember">
+        <input type="checkbox" id="remember"> <label for="remember">Save Password</label>
+      </div>
+      <button type="submit">Login</button>
+      <div class="error" id="errorMsg"></div>
+    </form>
   </div>
 
   <script>
-    function login() {
-      const user = document.getElementById('username').value;
-      const pass = document.getElementById('password').value;
-      if (user === 'kabir' && pass === 'empire123') {
-        window.location.href = 'tracker.html';
+    window.onload = function () {
+      const savedUsername = localStorage.getItem("savedUsername");
+      const savedPassword = localStorage.getItem("savedPassword");
+      if (savedUsername && savedPassword) {
+        document.getElementById("username").value = savedUsername;
+        document.getElementById("password").value = savedPassword;
+        document.getElementById("remember").checked = true;
+      }
+    }
+
+    function login(e) {
+      e.preventDefault();
+      const user = document.getElementById("username").value;
+      const pass = document.getElementById("password").value;
+      const remember = document.getElementById("remember").checked;
+
+      if (user.toLowerCase() === "kabir" && pass === "Empire123") {
+        if (remember) {
+          localStorage.setItem("savedUsername", user);
+          localStorage.setItem("savedPassword", pass);
+        } else {
+          localStorage.removeItem("savedUsername");
+          localStorage.removeItem("savedPassword");
+        }
+        window.location.href = "tracker.html";
       } else {
-        document.getElementById('error').innerText = 'Wrong credentials!';
+        document.getElementById("errorMsg").innerText = "Invalid Username or Password";
       }
     }
   </script>
