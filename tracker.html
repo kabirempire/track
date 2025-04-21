@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#ffffff">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
     body {
       margin: 0;
@@ -13,7 +14,6 @@
       background-color: #f2f2f7;
     }
 
-    /* Header */
     .header {
       display: flex;
       justify-content: space-between;
@@ -26,20 +26,26 @@
       z-index: 999;
     }
 
-    .header h2 {
-      margin: 0;
-      font-size: 22px;
-      font-weight: 600;
+    .profile {
+      display: flex;
+      align-items: center;
+    }
+
+    .profile img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 10px;
     }
 
     .menu-btn {
-      font-size: 24px;
+      font-size: 22px;
       cursor: pointer;
       background: none;
       border: none;
     }
 
-    /* Menu */
     .menu {
       display: none;
       flex-direction: column;
@@ -58,7 +64,6 @@
       color: #007aff;
       border-bottom: 1px solid #eee;
       font-size: 16px;
-      background: white;
     }
 
     .menu a:last-child {
@@ -71,19 +76,6 @@
       margin: auto;
     }
 
-    h1 {
-      text-align: center;
-      font-size: 26px;
-      margin-bottom: 5px;
-    }
-
-    .date-time {
-      text-align: center;
-      color: #888;
-      margin-bottom: 20px;
-      font-size: 14px;
-    }
-
     .task {
       background: #fff;
       padding: 16px 20px;
@@ -93,10 +85,6 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-    }
-
-    .task span {
-      font-size: 16px;
     }
 
     .task button {
@@ -124,92 +112,182 @@
       font-weight: 600;
     }
 
-    /* Responsive Menu Toggle */
-    @media only screen and (max-width: 600px) {
-      .menu {
-        right: 10px;
-      }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+    }
+
+    .modal-content h3 {
+      margin-top: 0;
+    }
+
+    .modal-content input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .modal-content textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .modal-content button {
+      width: 100%;
+      padding: 12px;
+      background-color: #007aff;
+      color: white;
+      border: none;
+      border-radius: 10px;
     }
   </style>
 </head>
 <body>
   <div class="header">
-    <h2>📱 Kabir Empire</h2>
-    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    <div class="profile">
+      <img src="https://via.placeholder.com/40" id="profilePic" alt="User Photo">
+      <span id="userName">Kabir</span>
+    </div>
+    <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
     <div class="menu" id="dropdownMenu">
-      <a href="#">✏️ Edit Profile</a>
-      <a href="#">🗂️ Edit Task</a>
-      <a href="reports.html">📊 Check Weekly Reports</a>
-      <a href="index.html">🚪 Logout</a>
+      <a href="#" onclick="openEditProfile()"><i class="fas fa-user-edit"></i> Edit Profile</a>
+      <a href="#" onclick="openEditTasks()"><i class="fas fa-tasks"></i> Edit Tasks</a>
+      <a href="index.html"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
   </div>
 
+  <div class="container" id="taskList"></div>
   <div class="container">
-    <h1>📋 Daily Tracker</h1>
-    <div class="date-time" id="datetime">Loading date...</div>
-
-    <div id="taskList"></div>
-
     <button class="submit-btn" onclick="submitTasks()">✅ Submit My Day</button>
   </div>
 
+  <!-- Edit Profile Modal -->
+  <div class="modal" id="editProfileModal">
+    <div class="modal-content">
+      <h3>Edit Profile</h3>
+      <input type="text" id="editUsername" placeholder="Enter new username">
+      <input type="password" id="editPassword" placeholder="Enter new password">
+      <input type="file" id="editProfilePic">
+      <button onclick="saveProfile()">Save</button>
+    </div>
+  </div>
+
+  <!-- Edit Tasks Modal -->
+  <div class="modal" id="editTasksModal">
+    <div class="modal-content">
+      <h3>Edit Tasks (Comma Separated)</h3>
+      <textarea id="editTasksBox"></textarea>
+      <button onclick="saveTasks()">Update Tasks</button>
+    </div>
+  </div>
+
   <script>
-    const activities = [
+    let userName = 'Kabir';
+    let profilePic = 'https://via.placeholder.com/40';
+    let activities = [
       "🎹 1 hr Harmonium",
       "📖 3 hr Research",
       "🎶 30 min Humming",
-      "📚 1 hr Book Reading",
-      "🥗 Eat Healthy (2x)",
-      "💧 3 Litres Water",
-      "🪒 Face Grooming",
-      "🏋️ 15 min Exercise",
-      "🎥 1 Informative Video"
+      "📚 1 hr Book Reading"
     ];
-
     const statusMap = {};
-    const taskList = document.getElementById("taskList");
 
-    activities.forEach((activity, index) => {
-      const task = document.createElement("div");
-      task.className = "task";
-      task.innerHTML = `
-        <span>${activity}</span>
-        <button onclick="toggleStatus(${index}, this)">Not Done</button>
-      `;
-      taskList.appendChild(task);
-      statusMap[index] = false;
-    });
+    function renderTasks() {
+      const taskList = document.getElementById("taskList");
+      taskList.innerHTML = '';
+      activities.forEach((task, index) => {
+        const div = document.createElement("div");
+        div.className = "task";
+        div.innerHTML = `<span>${task}</span><button onclick="toggleStatus(${index}, this)">Not Done</button>`;
+        taskList.appendChild(div);
+        statusMap[index] = false;
+      });
+    }
 
-    function toggleStatus(index, button) {
+    function toggleStatus(index, btn) {
       statusMap[index] = !statusMap[index];
-      button.innerText = statusMap[index] ? "Done ✅" : "Not Done";
-      button.classList.toggle("done", statusMap[index]);
+      btn.innerText = statusMap[index] ? "Done ✅" : "Not Done";
+      btn.classList.toggle("done", statusMap[index]);
     }
 
     function submitTasks() {
-      const results = activities.map((task, i) => ({
-        task,
-        done: statusMap[i]
-      }));
-
-      const todayData = {
+      const results = activities.map((task, i) => ({ task, done: statusMap[i] }));
+      const data = {
+        user: userName,
         date: new Date().toLocaleDateString(),
         time: new Date().toLocaleTimeString(),
+        profilePic: profilePic,
         results
       };
-
-      localStorage.setItem("kabir_day_data", JSON.stringify(todayData));
-      alert("✅ Your Day has been saved!");
-      window.location.href = "reports.html";
+      localStorage.setItem("kabir_day_data", JSON.stringify(data));
+      alert("✅ Tasks saved successfully!");
     }
 
     function toggleMenu() {
       const menu = document.getElementById("dropdownMenu");
-      menu.style.display = (menu.style.display === "flex") ? "none" : "flex";
+      menu.style.display = menu.style.display === "flex" ? "none" : "flex";
     }
 
-    document.getElementById("datetime").innerText =
-      new Date().toLocaleDateString() + " | " + new Date().toLocaleTimeString();
+    function openEditProfile() {
+      document.getElementById("editProfileModal").style.display = "flex";
+    }
+
+    function openEditTasks() {
+      document.getElementById("editTasksModal").style.display = "flex";
+      document.getElementById("editTasksBox").value = activities.join(", ");
+    }
+
+    function saveProfile() {
+      const newName = document.getElementById("editUsername").value;
+      const newPassword = document.getElementById("editPassword").value;
+      const newPic = document.getElementById("editProfilePic").files[0];
+
+      if (newName) {
+        userName = newName;
+        document.getElementById("userName").innerText = userName;
+      }
+
+      if (newPic) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          profilePic = e.target.result;
+          document.getElementById("profilePic").src = profilePic;
+        }
+        reader.readAsDataURL(newPic);
+      }
+
+      document.getElementById("editProfileModal").style.display = "none";
+    }
+
+    function saveTasks() {
+      const newTasks = document.getElementById("editTasksBox").value;
+      activities = newTasks.split(",").map(t => t.trim());
+      renderTasks();
+      document.getElementById("editTasksModal").style.display = "none";
+    }
+
+    // Initialize
+    renderTasks();
   </script>
 </body>
 </html>
