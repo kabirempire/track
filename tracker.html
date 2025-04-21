@@ -3,121 +3,187 @@
 <head>
   <meta charset="UTF-8" />
   <title>Kabir Empire - Tracker</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#f2f2f7">
+  <meta name="theme-color" content="#ffffff">
   <style>
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: #f2f2f7;
-      color: #1c1c1e;
     }
 
+    /* Header */
     .header {
-      text-align: center;
-      padding: 25px 15px 10px;
-      background: white;
-      font-size: 24px;
-      font-weight: 600;
-      border-bottom: 1px solid #ccc;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #ffffff;
+      padding: 15px 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 999;
     }
 
-    .datetime {
-      text-align: center;
-      color: #8e8e93;
-      font-size: 14px;
-      margin: 5px 0 20px;
+    .header h2 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    .menu-btn {
+      font-size: 24px;
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+
+    /* Menu */
+    .menu {
+      display: none;
+      flex-direction: column;
+      background: #fff;
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .menu a {
+      padding: 12px 20px;
+      text-decoration: none;
+      color: #007aff;
+      border-bottom: 1px solid #eee;
+      font-size: 16px;
+      background: white;
+    }
+
+    .menu a:last-child {
+      border-bottom: none;
     }
 
     .container {
       padding: 20px;
+      max-width: 500px;
+      margin: auto;
     }
 
-    .task-card {
-      background: white;
-      border-radius: 18px;
-      padding: 18px;
-      box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+    h1 {
+      text-align: center;
+      font-size: 26px;
+      margin-bottom: 5px;
+    }
+
+    .date-time {
+      text-align: center;
+      color: #888;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .task {
+      background: #fff;
+      padding: 16px 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      margin-bottom: 15px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 15px;
-      transition: 0.2s;
     }
 
-    .task-card span {
+    .task span {
       font-size: 16px;
-      font-weight: 500;
     }
 
-    .task-card button {
-      padding: 6px 14px;
+    .task button {
+      padding: 8px 12px;
+      font-size: 14px;
       border: none;
       border-radius: 10px;
-      font-size: 14px;
       color: white;
       background-color: #007aff;
-      transition: background 0.3s;
+    }
+
+    .task button.done {
+      background-color: #34c759;
     }
 
     .submit-btn {
       width: 100%;
-      margin-top: 30px;
       padding: 16px;
-      font-size: 18px;
-      background-color: #34c759;
+      font-size: 17px;
+      background: #34c759;
       color: white;
       border: none;
       border-radius: 14px;
+      margin-top: 25px;
       font-weight: 600;
-      transition: 0.3s;
     }
 
-    .submit-btn:active {
-      background-color: #2ba94e;
+    /* Responsive Menu Toggle */
+    @media only screen and (max-width: 600px) {
+      .menu {
+        right: 10px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="header">📋 Kabir's Tracker</div>
-  <div class="datetime" id="datetime">Loading...</div>
-  <div class="container" id="taskList"></div>
+  <div class="header">
+    <h2>📱 Kabir Empire</h2>
+    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    <div class="menu" id="dropdownMenu">
+      <a href="#">✏️ Edit Profile</a>
+      <a href="#">🗂️ Edit Task</a>
+      <a href="reports.html">📊 Check Weekly Reports</a>
+      <a href="index.html">🚪 Logout</a>
+    </div>
+  </div>
+
   <div class="container">
-    <button class="submit-btn" onclick="submitTasks()">✅ Submit Today's Tasks</button>
+    <h1>📋 Daily Tracker</h1>
+    <div class="date-time" id="datetime">Loading date...</div>
+
+    <div id="taskList"></div>
+
+    <button class="submit-btn" onclick="submitTasks()">✅ Submit My Day</button>
   </div>
 
   <script>
     const activities = [
-      "1 hr Harmonium 🎹",
-      "3 hr Research 📖",
-      "30 min Humming 🎶",
-      "1 hr Book Reading 📚",
-      "Eat Healthy (2x) 🥗",
-      "3 Litres Water 💧",
-      "Face Grooming 🪒",
-      "15 min Exercise 🏋️‍♂️",
-      "1 Informative Video 🎥"
+      "🎹 1 hr Harmonium",
+      "📖 3 hr Research",
+      "🎶 30 min Humming",
+      "📚 1 hr Book Reading",
+      "🥗 Eat Healthy (2x)",
+      "💧 3 Litres Water",
+      "🪒 Face Grooming",
+      "🏋️ 15 min Exercise",
+      "🎥 1 Informative Video"
     ];
 
-    const taskList = document.getElementById("taskList");
     const statusMap = {};
+    const taskList = document.getElementById("taskList");
 
-    activities.forEach((task, index) => {
-      const taskBox = document.createElement("div");
-      taskBox.className = "task-card";
-      taskBox.innerHTML = `
-        <span>${task}</span>
+    activities.forEach((activity, index) => {
+      const task = document.createElement("div");
+      task.className = "task";
+      task.innerHTML = `
+        <span>${activity}</span>
         <button onclick="toggleStatus(${index}, this)">Not Done</button>
       `;
-      taskList.appendChild(taskBox);
+      taskList.appendChild(task);
       statusMap[index] = false;
     });
 
-    function toggleStatus(index, btn) {
+    function toggleStatus(index, button) {
       statusMap[index] = !statusMap[index];
-      btn.innerText = statusMap[index] ? "Done ✅" : "Not Done";
-      btn.style.backgroundColor = statusMap[index] ? "#34c759" : "#007aff";
+      button.innerText = statusMap[index] ? "Done ✅" : "Not Done";
+      button.classList.toggle("done", statusMap[index]);
     }
 
     function submitTasks() {
@@ -125,18 +191,25 @@
         task,
         done: statusMap[i]
       }));
-      const data = {
+
+      const todayData = {
         date: new Date().toLocaleDateString(),
         time: new Date().toLocaleTimeString(),
         results
       };
-      localStorage.setItem("kabirDay", JSON.stringify(data));
-      window.location.href = "report.html";
+
+      localStorage.setItem("kabir_day_data", JSON.stringify(todayData));
+      alert("✅ Your Day has been saved!");
+      window.location.href = "reports.html";
     }
 
-    // Set date/time
+    function toggleMenu() {
+      const menu = document.getElementById("dropdownMenu");
+      menu.style.display = (menu.style.display === "flex") ? "none" : "flex";
+    }
+
     document.getElementById("datetime").innerText =
-      new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString();
+      new Date().toLocaleDateString() + " | " + new Date().toLocaleTimeString();
   </script>
 </body>
 </html>
