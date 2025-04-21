@@ -48,25 +48,56 @@
       color: white;
       font-size: 17px;
       font-weight: 500;
-      transition: background 0.3s;
-    }
-    .login-box button:hover {
-      background-color: #005fcc;
     }
     .login-box .error {
       color: red;
       margin-top: 10px;
       text-align: center;
     }
-    .remember {
+    .login-box .link {
+      text-align: center;
       margin-top: 10px;
       font-size: 14px;
-      display: flex;
+      color: #007aff;
+      cursor: pointer;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
       align-items: center;
     }
-    .remember input {
-      width: auto;
-      margin-right: 8px;
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+    }
+    .modal-content input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    .modal-content button {
+      width: 100%;
+      padding: 12px;
+      background-color: #007aff;
+      color: white;
+      border: none;
+      border-radius: 10px;
+    }
+    .modal-content .message {
+      text-align: center;
+      color: green;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -76,43 +107,65 @@
     <form onsubmit="return login(event)">
       <input type="text" id="username" placeholder="Username" autocomplete="username" required>
       <input type="password" id="password" placeholder="Password" autocomplete="current-password" required>
-      <div class="remember">
-        <input type="checkbox" id="remember"> <label for="remember">Save Password</label>
-      </div>
       <button type="submit">Login</button>
       <div class="error" id="errorMsg"></div>
+      <div class="link" onclick="openSignup()">Create an Account</div>
     </form>
   </div>
 
-  <script>
-    window.onload = function () {
-      const savedUsername = localStorage.getItem("savedUsername");
-      const savedPassword = localStorage.getItem("savedPassword");
-      if (savedUsername && savedPassword) {
-        document.getElementById("username").value = savedUsername;
-        document.getElementById("password").value = savedPassword;
-        document.getElementById("remember").checked = true;
-      }
-    }
+  <!-- Signup Modal -->
+  <div class="modal" id="signupModal">
+    <div class="modal-content">
+      <h3>Create Account</h3>
+      <input type="text" id="firstName" placeholder="First Name" required>
+      <input type="text" id="lastName" placeholder="Last Name" required>
+      <input type="tel" id="mobile" placeholder="Mobile Number" required>
+      <input type="email" id="email" placeholder="Email Address" required>
+      <input type="text" id="newUsername" placeholder="Username" required>
+      <input type="password" id="newPassword" placeholder="Create Password" required>
+      <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+      <button onclick="createAccount()">Create Account</button>
+      <div class="message" id="signupMessage"></div>
+    </div>
+  </div>
 
+  <script>
     function login(e) {
       e.preventDefault();
       const user = document.getElementById("username").value;
       const pass = document.getElementById("password").value;
-      const remember = document.getElementById("remember").checked;
-
-      if (user.toLowerCase() === "kabir" && pass === "Empire123") {
-        if (remember) {
-          localStorage.setItem("savedUsername", user);
-          localStorage.setItem("savedPassword", pass);
-        } else {
-          localStorage.removeItem("savedUsername");
-          localStorage.removeItem("savedPassword");
-        }
-        window.location.href = "tracker.html";
+      const stored = JSON.parse(localStorage.getItem("kabirAccount"));
+      if (stored && user === stored.username && pass === stored.password) {
+        localStorage.setItem("activeUser", JSON.stringify(stored));
+        window.location.href = 'tracker.html';
       } else {
-        document.getElementById("errorMsg").innerText = "Invalid Username or Password";
+        document.getElementById("errorMsg").innerText = 'Invalid credentials';
       }
+    }
+
+    function openSignup() {
+      document.getElementById("signupModal").style.display = "flex";
+    }
+
+    function createAccount() {
+      const data = {
+        firstName: document.getElementById("firstName").value,
+        lastName: document.getElementById("lastName").value,
+        mobile: document.getElementById("mobile").value,
+        email: document.getElementById("email").value,
+        username: document.getElementById("newUsername").value,
+        password: document.getElementById("newPassword").value
+      };
+      const confirm = document.getElementById("confirmPassword").value;
+      if (data.password !== confirm) {
+        document.getElementById("signupMessage").innerText = "Passwords do not match.";
+        return;
+      }
+      localStorage.setItem("kabirAccount", JSON.stringify(data));
+      document.getElementById("signupMessage").innerText = "🎉 Account created! You can login now.";
+      setTimeout(() => {
+        document.getElementById("signupModal").style.display = "none";
+      }, 2000);
     }
   </script>
 </body>
