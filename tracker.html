@@ -21,57 +21,37 @@
       color: var(--text-color);
     }
     .header {
+      background: var(--header-bg);
+      padding: 15px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: var(--header-bg);
-      padding: 15px 20px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      position: sticky;
-      top: 0;
-      z-index: 999;
-    }
-    .profile {
-      display: flex;
-      align-items: center;
-    }
-    .profile img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-right: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     }
     .menu-btn {
-      font-size: 22px;
+      font-size: 20px;
       cursor: pointer;
-      background: none;
-      border: none;
-      color: var(--text-color);
     }
     .menu {
       display: none;
       flex-direction: column;
-      background: var(--header-bg);
+      background: white;
       position: absolute;
       top: 60px;
-      right: 20px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      border-radius: 12px;
+      right: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
       overflow: hidden;
     }
     .menu a, .menu button {
       padding: 12px 20px;
+      font-size: 14px;
       text-decoration: none;
+      border: none;
+      background: none;
+      text-align: left;
       color: #007aff;
       border-bottom: 1px solid #eee;
-      font-size: 16px;
-      background: none;
-      border: none;
-      text-align: left;
-    }
-    .menu a:last-child, .menu button:last-child {
-      border-bottom: none;
     }
     .container {
       padding: 20px;
@@ -80,7 +60,7 @@
     }
     .task {
       background: var(--task-bg);
-      padding: 16px 20px;
+      padding: 16px;
       border-radius: 15px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.05);
       margin-bottom: 15px;
@@ -88,31 +68,30 @@
       justify-content: space-between;
       align-items: center;
     }
-    .task-controls {
+    .task .controls {
       display: flex;
-      gap: 8px;
+      gap: 6px;
     }
     .task button {
-      padding: 8px 12px;
-      font-size: 14px;
+      padding: 6px 10px;
       border: none;
-      border-radius: 10px;
+      border-radius: 8px;
       color: white;
       background-color: #007aff;
+      cursor: pointer;
     }
     .task button.done {
       background-color: #34c759;
     }
     .submit-btn {
       width: 100%;
-      padding: 16px;
-      font-size: 17px;
+      padding: 14px;
+      font-size: 16px;
       background: #34c759;
       color: white;
       border: none;
-      border-radius: 14px;
-      margin-top: 25px;
-      font-weight: 600;
+      border-radius: 12px;
+      font-weight: bold;
     }
     .modal {
       display: none;
@@ -151,7 +130,23 @@
   </style>
 </head>
 <body>
-  <!-- existing header and container structure will stay as is -->
+  <div class="header">
+    <h3>Kabir Empire</h3>
+    <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+    <div class="menu" id="menu">
+      <a href="#" onclick="editProfile()">👤 Edit Profile</a>
+      <a href="#" onclick="editTasks()">📝 Edit Tasks</a>
+      <a href="reports.html">📈 Check Weekly Reports</a>
+      <button onclick="setTheme('light')">☀️ Light Theme</button>
+      <button onclick="setTheme('dark')">🌙 Dark Theme</button>
+      <a href="index.html">🚪 Logout</a>
+    </div>
+  </div>
+
+  <div class="container" id="taskList"></div>
+  <div class="container">
+    <button class="submit-btn" onclick="submitTasks()">✅ Submit My Day</button>
+  </div>
 
   <!-- Reminder Modal -->
   <div class="modal" id="reminderModal">
@@ -170,7 +165,69 @@
   <audio id="alarmAudio"></audio>
 
   <script>
+    const root = document.documentElement;
+    const menu = document.getElementById("menu");
     let reminderTaskIndex = null;
+    let activities = [
+      "🎹 1 hr Harmonium",
+      "📖 3 hr Research",
+      "🎶 30 min Humming",
+      "📚 1 hr Book Reading"
+    ];
+    const statusMap = {};
+
+    function toggleMenu() {
+      menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+      menu.style.flexDirection = "column";
+    }
+
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.style.setProperty('--bg-color', '#1c1c1e');
+        root.style.setProperty('--text-color', '#f2f2f7');
+        root.style.setProperty('--header-bg', '#2c2c2e');
+        root.style.setProperty('--task-bg', '#3a3a3c');
+      } else {
+        root.style.setProperty('--bg-color', '#f2f2f7');
+        root.style.setProperty('--text-color', '#1c1c1e');
+        root.style.setProperty('--header-bg', '#ffffff');
+        root.style.setProperty('--task-bg', '#ffffff');
+      }
+    }
+
+    function renderTasks() {
+      const taskList = document.getElementById("taskList");
+      taskList.innerHTML = '';
+      activities.forEach((task, index) => {
+        const div = document.createElement("div");
+        div.className = "task";
+        div.innerHTML = `
+          <span>${task}</span>
+          <div class="controls">
+            <button onclick="toggleStatus(${index}, this)">Not Done</button>
+            <button onclick="openReminderModal(${index})">➕</button>
+          </div>`;
+        taskList.appendChild(div);
+        if (!(index in statusMap)) statusMap[index] = false;
+      });
+    }
+
+    function toggleStatus(index, btn) {
+      statusMap[index] = !statusMap[index];
+      btn.innerText = statusMap[index] ? "Done ✅" : "Not Done";
+      btn.classList.toggle("done", statusMap[index]);
+    }
+
+    function submitTasks() {
+      const results = activities.map((task, i) => ({ task, done: statusMap[i] }));
+      const data = {
+        date: new Date().toLocaleDateString(),
+        time: new Date().toLocaleTimeString(),
+        results
+      };
+      localStorage.setItem("kabir_day_data", JSON.stringify(data));
+      alert("✅ Tasks saved successfully!");
+    }
 
     function openReminderModal(index) {
       reminderTaskIndex = index;
@@ -205,6 +262,16 @@
     if (Notification.permission !== 'granted') {
       Notification.requestPermission();
     }
+
+    function editProfile() {
+      alert("Edit Profile feature coming soon.");
+    }
+
+    function editTasks() {
+      alert("Edit Tasks feature coming soon.");
+    }
+
+    renderTasks();
   </script>
 </body>
 </html>
