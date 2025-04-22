@@ -28,6 +28,17 @@
       align-items: center;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     }
+    .profile {
+      display: flex;
+      align-items: center;
+    }
+    .profile img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 10px;
+    }
     .menu-btn {
       font-size: 20px;
       cursor: pointer;
@@ -112,7 +123,7 @@
       width: 90%;
       max-width: 400px;
     }
-    .modal-content input, .modal-content select {
+    .modal-content input, .modal-content select, .modal-content textarea {
       width: 100%;
       padding: 10px;
       margin-bottom: 10px;
@@ -131,11 +142,14 @@
 </head>
 <body>
   <div class="header">
-    <h3>Kabir Empire</h3>
+    <div class="profile">
+      <img id="profilePhoto" src="https://via.placeholder.com/40" alt="Profile Photo">
+      <h3 id="usernameHeader">Kabir Empire</h3>
+    </div>
     <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
     <div class="menu" id="menu">
-      <a href="#" onclick="editProfile()">👤 Edit Profile</a>
-      <a href="#" onclick="editTasks()">📝 Edit Tasks</a>
+      <a href="#" onclick="openEditProfileModal()">👤 Edit Profile</a>
+      <a href="#" onclick="openEditTasksModal()">📝 Edit Tasks</a>
       <a href="reports.html">📈 Check Weekly Reports</a>
       <button onclick="setTheme('light')">☀️ Light Theme</button>
       <button onclick="setTheme('dark')">🌙 Dark Theme</button>
@@ -146,6 +160,25 @@
   <div class="container" id="taskList"></div>
   <div class="container">
     <button class="submit-btn" onclick="submitTasks()">✅ Submit My Day</button>
+  </div>
+
+  <!-- Edit Profile Modal -->
+  <div class="modal" id="editProfileModal">
+    <div class="modal-content">
+      <h3>Edit Profile</h3>
+      <input type="text" id="editUsername" placeholder="Enter your name">
+      <input type="file" id="editPhoto">
+      <button onclick="saveProfileChanges()">Save Changes</button>
+    </div>
+  </div>
+
+  <!-- Edit Tasks Modal -->
+  <div class="modal" id="editTasksModal">
+    <div class="modal-content">
+      <h3>Edit Task List</h3>
+      <textarea id="taskTextArea"></textarea>
+      <button onclick="saveTaskChanges()">Update Tasks</button>
+    </div>
   </div>
 
   <!-- Reminder Modal -->
@@ -167,8 +200,10 @@
   <script>
     const root = document.documentElement;
     const menu = document.getElementById("menu");
+    const usernameHeader = document.getElementById("usernameHeader");
+    const profilePhoto = document.getElementById("profilePhoto");
     let reminderTaskIndex = null;
-    let activities = [
+    let activities = JSON.parse(localStorage.getItem("tasks")) || [
       "🎹 1 hr Harmonium",
       "📖 3 hr Research",
       "🎶 30 min Humming",
@@ -259,19 +294,53 @@
       document.getElementById("reminderModal").style.display = "none";
     }
 
+    function openEditProfileModal() {
+      document.getElementById("editProfileModal").style.display = "flex";
+    }
+
+    function saveProfileChanges() {
+      const name = document.getElementById("editUsername").value;
+      const photo = document.getElementById("editPhoto").files[0];
+      if (name) {
+        localStorage.setItem("username", name);
+        usernameHeader.textContent = name;
+      }
+      if (photo) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          profilePhoto.src = e.target.result;
+          localStorage.setItem("profilePhoto", e.target.result);
+        }
+        reader.readAsDataURL(photo);
+      }
+      document.getElementById("editProfileModal").style.display = "none";
+    }
+
+    function openEditTasksModal() {
+      document.getElementById("editTasksModal").style.display = "flex";
+      document.getElementById("taskTextArea").value = activities.join("\n");
+    }
+
+    function saveTaskChanges() {
+      const updated = document.getElementById("taskTextArea").value.trim().split("\n");
+      activities = updated;
+      localStorage.setItem("tasks", JSON.stringify(activities));
+      renderTasks();
+      document.getElementById("editTasksModal").style.display = "none";
+    }
+
     if (Notification.permission !== 'granted') {
       Notification.requestPermission();
     }
 
-    function editProfile() {
-      alert("Edit Profile feature coming soon.");
+    // Load username and photo from localStorage
+    window.onload = () => {
+      const savedName = localStorage.getItem("username");
+      const savedPhoto = localStorage.getItem("profilePhoto");
+      if (savedName) usernameHeader.textContent = savedName;
+      if (savedPhoto) profilePhoto.src = savedPhoto;
+      renderTasks();
     }
-
-    function editTasks() {
-      alert("Edit Tasks feature coming soon.");
-    }
-
-    renderTasks();
   </script>
 </body>
 </html>
